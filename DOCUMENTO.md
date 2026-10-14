@@ -16,6 +16,28 @@ tempi e numero di elementi non nulli del fattore L.
 1. **Generazione della griglia e del grafo** (C++, Task 1)
    Dato N, crea i punti interni del dominio e gli archi tra punti
    vicini. Produce `coords.txt` e `connectivity.txt`.
+   1. **Generazione della griglia e del grafo** (C++, Task 1) – *implementato in `task1.cpp`*
+
+   - **Input.** Intero N ≥ 1, passato da riga di comando (`./task1 N`).
+   - **Output.** `coords.txt` con N² righe `n i j x y`;
+     `connectivity.txt` con 2N(N − 1) righe `e n1 n2`.
+   - **Specifiche.** Genera i punti interni (i, j = 1, …, N) con
+     x = i·h, y = j·h, h = 1/(N + 1), e un arco per ogni coppia di
+     punti vicini in orizzontale o verticale.
+   - **Scelte.** Numerazione per righe, n = (j − 1)·N + (i − 1). Ogni
+     arco viene scritto una sola volta, partendo dal nodo a sinistra
+     o in basso.
+   - **Complessità.** Tempo Θ(N²), lineare nella dimensione
+     dell'output. Memoria aggiuntiva O(1): i dati vengono scritti su
+     file man mano, senza essere memorizzati.
+   - **Invariante.** Gli indici n in `coords.txt` compaiono in ordine
+     crescente da 0 a N² − 1, quindi la riga k del file descrive il
+     nodo k.
+   - **Dipendenze.** Nessuna; è il primo modulo della catena.
+   - **Verifica.** Il programma stampa il numero di archi generati e
+     quello atteso 2N(N − 1).
+
+ 
 
 2. **Riordinamento dei nodi** (C++, Task 2)
    Divide ricorsivamente i nodi in V1, V2 e un separatore VS,
