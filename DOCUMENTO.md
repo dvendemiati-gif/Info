@@ -32,6 +32,10 @@ tempi e numero di elementi non nulli del fattore L.
 ## Strutture dati fondamentali (idea iniziale)
 
 - Un nodo: indice n, indici di griglia (i, j), coordinate (x, y).
+- Numerazione dei nodi per righe: n = (j − 1)·N + (i − 1), con
+  i, j = 1, …, N. I vicini di n sono n ± 1 (orizzontali) e n ± N
+  (verticali), quindi gli archi si generano in tempo O(1) ciascuno.
+- Numero di nodi: N². Numero di archi: 2N(N − 1).
 - La lista dei nodi e la lista degli archi (coppie di indici n1, n2).
 - Un ordinamento: corrispondenza tra nuovo indice m e indice originale n.
 - La matrice A: memorizzata in forma sparsa, solo le entrate non nulle.
@@ -47,6 +51,6 @@ N → [Modulo 1] → coords.txt, connectivity.txt
 
 ## Questioni aperte
 
-- Come numerare i nodi in coords.txt (per righe o per colonne)?
+- Come numerare i nodi in coords.txt (per righe o per colonne)? Numerati per righe
 - Quando fermare la ricorsione nel riordinamento?
 - Quale struttura usare per la matrice sparsa in C++?
