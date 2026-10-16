@@ -36,7 +36,8 @@ tempi e numero di elementi non nulli del fattore L.
    - **Dipendenze.** Nessuna; è il primo modulo della catena.
    - **Verifica.** Il programma stampa il numero di archi generati e
      quello atteso 2N(N − 1).
-
+   - Il codice non memorizza il grafo scrive gli archi direttamente su file e usa memoria O(1). I vicini si ricavano dalla formula dell'indice in tempo costante,
+     quindi non serve memorizzarli. Per le liste di adiacenza le costruisco leggendo connectivity.txt
  
 
 2. **Riordinamento dei nodi** (C++, Task 2)
