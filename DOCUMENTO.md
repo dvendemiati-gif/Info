@@ -43,6 +43,30 @@ tempi e numero di elementi non nulli del fattore L.
 2. **Riordinamento dei nodi** (C++, Task 2)
    Divide ricorsivamente i nodi in V1, V2 e un separatore VS,
    alternando tagli verticali e orizzontali. Produce `ordering.txt`.
+   2. **Riordinamento dei nodi** (C++, Task 2) – *implementato in `task2.cpp`*
+
+   - **Input.** `coords.txt` prodotto dal modulo 1 (letto dalla
+     cartella corrente). `connectivity.txt` non serve, perché
+     l'euristica è geometrica.
+   - **Output.** `ordering.txt` con N² righe `m n`: m è il nuovo
+     indice, n l'indice originale del nodo.
+   - **Specifiche.** Ordinamento di tipo nested dissection: si taglia
+     il blocco sulla colonna (o riga) centrale, che diventa il
+     separatore VS; si ordinano ricorsivamente le due parti V₁ e V₂ e
+     si aggiunge VS per ultimo. I tagli si alternano tra verticali e
+     orizzontali.
+   - **Strutture dati.** Una tabella `griglia[j][i]` che dà l'indice
+     del nodo in posizione (i, j) in O(1); un vettore `ordine` con
+     ordine[m] = n.
+   - **Caso base.** Un blocco con entrambi i lati lunghi meno di 3 non
+     si divide; se solo il lato di turno è troppo corto, si taglia
+     nell'altra direzione.
+   - **Complessità.** Tempo Θ(N²): ogni nodo viene aggiunto una sola
+     volta. Profondità della ricorsione circa 2·log₂N. Memoria Θ(N²).
+   - **Verifica.** Il programma controlla che l'ordinamento sia una
+     permutazione di 0, …, N² − 1. Con N = 3 il risultato atteso è
+     0, 6, 3, 2, 8, 5, 1, 4, 7.
+   - **Dipendenze.** Richiede l'output del modulo 1.
 
 3. **Costruzione del sistema lineare** (C++, Task 3)
    Costruisce la matrice A e il termine noto secondo l'ordinamento
