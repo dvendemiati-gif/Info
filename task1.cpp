@@ -82,11 +82,16 @@ int main(int argc, char* argv[]) {
     // Due cicli annidati nello stesso ordine della numerazione (j esterno,
     // i interno): cosi' l'indice n esce in ordine crescente 0, 1, 2, ...
     std::ofstream coords("coords.txt");
+    if (!coords) {
+        std::cerr << "Errore: impossibile creare coords.txt\n";
+        return 1;
+    }
 
+    coords << std::setprecision(17);
     // setprecision(17): un double ha circa 16 cifre significative; con 17
     // cifre il valore scritto su file si rilegge identico, senza perdite.
     // Con la precisione di default (6 cifre) perderemmo informazione.
-    coords << std::setprecision(17);
+   
 
     for (int j = 1; j <= N; ++j) {
         for (int i = 1; i <= N; ++i) {
@@ -107,6 +112,12 @@ int main(int argc, char* argv[]) {
     // In questo modo ogni arco compare esattamente una volta, senza bisogno
     // di controllare i duplicati.
     std::ofstream conn("connectivity.txt");
+    if (!conn) {
+        std::cerr << "Errore: impossibile creare connectivity.txt\n";
+        return 1;
+    }
+
+
     long e = 0;  // indice progressivo degli archi, da 0
 
     for (int j = 1; j <= N; ++j) {
