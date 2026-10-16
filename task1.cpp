@@ -86,13 +86,11 @@ int main(int argc, char* argv[]) {
         std::cerr << "Errore: impossibile creare coords.txt\n";
         return 1;
     }
-
-    coords << std::setprecision(17);
     // setprecision(17): un double ha circa 16 cifre significative; con 17
     // cifre il valore scritto su file si rilegge identico, senza perdite.
     // Con la precisione di default (6 cifre) perderemmo informazione.
-   
-
+    coords << std::setprecision(17);
+    
     for (int j = 1; j <= N; ++j) {
         for (int i = 1; i <= N; ++i) {
             // x = i*h calcolato ogni volta, e non sommando h a ogni passo:
