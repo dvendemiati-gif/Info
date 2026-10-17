@@ -16,8 +16,7 @@ tempi e numero di elementi non nulli del fattore L.
 1. **Generazione della griglia e del grafo** (C++, Task 1)
    Dato N, crea i punti interni del dominio e gli archi tra punti
    vicini. Produce `coords.txt` e `connectivity.txt`.
-   1. **Generazione della griglia e del grafo** (C++, Task 1) – *implementato in `task1.cpp`*
-
+   
    - **Input.** Intero N ≥ 1, passato da riga di comando (`./task1 N`).
    - **Output.** `coords.txt` con N² righe `n i j x y`;
      `connectivity.txt` con 2N(N − 1) righe `e n1 n2`.
@@ -43,8 +42,7 @@ tempi e numero di elementi non nulli del fattore L.
 2. **Riordinamento dei nodi** (C++, Task 2)
    Divide ricorsivamente i nodi in V1, V2 e un separatore VS,
    alternando tagli verticali e orizzontali. Produce `ordering.txt`.
-   2. **Riordinamento dei nodi** (C++, Task 2) – *implementato in `task2.cpp`*
-
+   
    - **Input.** `coords.txt` prodotto dal modulo 1 (letto dalla
      cartella corrente). `connectivity.txt` non serve, perché
      l'euristica è geometrica.
@@ -71,6 +69,34 @@ tempi e numero di elementi non nulli del fattore L.
 3. **Costruzione del sistema lineare** (C++, Task 3)
    Costruisce la matrice A e il termine noto secondo l'ordinamento
    scelto (naturale o riordinato). Produce `A.txt` e `rhs.txt`.
+  
+   - **Input.** `coords.txt` (modulo 1) e, se si sceglie il
+     riordinamento, `ordering.txt` (modulo 2). L'ordinamento si sceglie
+     da riga di comando: `./task3 naturale` oppure `./task3 riordinato`.
+   - **Output.** `A.txt` con righe `r c A[r,c]` (solo entrate non
+     nulle) e `rhs.txt` con un valore per riga; gli indici sono quelli
+     del nuovo ordinamento.
+   - **Specifiche.** Ogni nodo interno dà un'equazione:
+     κ/h²·(somma dei 4 vicini − 4u) + f = 0. Nella riga del nodo:
+     −4κ/h² sulla diagonale, +κ/h² per ogni vicino interno, termine
+     noto −f(x, y). I vicini sul bordo non sono incognite: il loro
+     contributo κ/h²·u₀ viene sottratto dal termine noto.
+   - **Riordinamento.** Con la permutazione nuovo[n] = m, l'entrata tra
+     i nodi a e b finisce in posizione (nuovo[a], nuovo[b]): righe e
+     colonne vengono permutate allo stesso modo.
+   - **Strutture dati.** La tabella `griglia[j][i]` include anche i
+     punti di bordo, marcati con −1, per riconoscerli in O(1). La
+     matrice non viene memorizzata: le entrate sono scritte su file
+     man mano.
+   - **Complessità.** Tempo Θ(N²), memoria Θ(N²).
+   - **Verifica.** Il programma controlla che i non zeri siano
+     N² + 4N(N − 1) (diagonale più ogni arco contato due volte). Con
+     N = 3 abbiamo verificato che A è simmetrica e definita negativa e
+     che i due ordinamenti danno la stessa soluzione, a meno della
+     permutazione delle incognite.
+   - **Opzionale.** La funzione `u0` è isolata nel codice: cambiandola,
+     il termine noto si aggiorna in modo coerente.
+   - **Dipendenze.** Richiede l'output dei moduli 1 e 2.
 
 4. **Risoluzione e analisi** (notebook Python, Task 4 e 5)
    Legge A e rhs, fattorizza −A = L·Lᵀ, risolve il sistema, confronta
