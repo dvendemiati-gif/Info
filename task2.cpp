@@ -2,8 +2,9 @@
 // TASK 2 - Riordinamento dei nodi di tipo nested dissection
 // =============================================================================
 //
-// Uso:      ./task2           (legge coords.txt dalla cartella corrente)
+// Uso:      ./task2           (legge i file dalla cartella corrente)
 // Input:    coords.txt        righe "n i j x y", prodotto da task1
+//           connectivity.txt  righe "e n1 n2",   prodotto da task1
 // Output:   ordering.txt      righe "m n": m = nuovo indice (0..N^2-1),
 //                             n = indice originale del nodo in coords.txt
 //
@@ -22,23 +23,27 @@
 //
 // RICORSIONE (nested dissection). L'ordine finale e'
 //     [ordine di V1] [ordine di V2] [nodi di VS]
-// dove V1 e V2 si ordinano con la stessa idea, alternando tagli verticali e
-// orizzontali come chiede il testo. Il separatore va SEMPRE dopo le due
-// parti che separa: cosi' il separatore piu' grande (la colonna centrale di
-// tutta la griglia) finisce in fondo, e quelli piccoli all'inizio.
+// dove V1 e V2 si ordinano con la stessa idea. Il separatore va SEMPRE dopo
+// le due parti che separa: cosi' il separatore piu' grande (la colonna
+// centrale di tutta la griglia) finisce in fondo, e quelli piccoli all'inizio.
 // Motivo: nella matrice A le entrate tra nodi di V1 e di V2 sono nulle
 // (non ci sono archi); mettendo VS per ultimo, la fattorizzazione di
 // Cholesky conserva nulli quei blocchi e il fattore L resta piu' sparso.
 //
-// PERCHE' TAGLI ALTERNATI. Conviene tagliare perpendicolarmente al lato piu'
-// lungo, cosi' il separatore e' lungo quanto il lato corto. Partendo da un
-// quadrato, un taglio verticale produce rettangoli alti e stretti, che vanno
-// tagliati in orizzontale, e cosi' via: da qui l'alternanza.
+// TAGLI ALTERNATI. Come chiede il testo, si alternano tagli verticali
+// (x = x^) e orizzontali (y = y^), scegliendo ogni volta la colonna o la riga
+// centrale del blocco. Partendo da un quadrato, un taglio verticale produce
+// rettangoli alti e stretti, e il taglio orizzontale successivo li riporta
+// vicini a dei quadrati: cosi' i separatori restano corti. Unica eccezione:
+// se il lato da tagliare ha meno di 3 nodi, si taglia nell'altra direzione.
 //
 // CASO BASE. Per tagliare un lato servono almeno 3 nodi (uno a sinistra, uno
-// nel separatore, uno a destra). Se il lato di turno e' troppo corto si prova
-// l'altra direzione; se entrambi i lati hanno meno di 3 nodi il blocco non si
-// divide: si aggiungono i suoi nodi e la ricorsione termina.
+// nel separatore, uno a destra). Se entrambi i lati hanno meno di 3 nodi
+// (blocco di al piu' 2x2) il blocco non si divide: si aggiungono i suoi nodi
+// e la ricorsione termina. Poiche' si taglia solo un lato con almeno 3 nodi,
+// le due parti hanno sempre almeno un nodo: non si creano blocchi vuoti.
+// TERMINAZIONE: ogni chiamata ricorsiva lavora su un blocco strettamente piu'
+// piccolo, perche' il separatore toglie almeno una riga o una colonna.
 //
 // ESEMPIO N = 3 (risultato atteso, usato come test):
 //     j=3:  6 7 8
@@ -46,7 +51,7 @@
 //     j=1:  0 1 2                         V1      V2      VS
 //
 // COMPLESSITA' (modello RAM):
-//   - Tempo: Theta(N^2). La lettura di coords.txt costa Theta(N^2); nella
+//   - Tempo: Theta(N^2). La lettura dei file costa Theta(N^2); nella
 //     ricorsione ogni nodo viene aggiunto alla lista esattamente una volta
 //     (in un separatore o in un caso base) e ogni chiamata fa lavoro O(1)
 //     oltre ai nodi che aggiunge. Le chiamate sono al piu' O(N^2).
@@ -55,8 +60,9 @@
 //     esaurire lo stack.
 //   - Memoria: Theta(N^2), per la tabella dei nodi e per la lista finale.
 //
-// NOTA. connectivity.txt non viene letto: l'euristica e' geometrica e usa
-// solo la posizione dei nodi (gli indici di griglia i, j di coords.txt).
+// USO DEI FILE. Il riordinamento e' geometrico e usa coords.txt (gli indici
+// di griglia i, j). connectivity.txt serve a VERIFICARE la proprieta' del
+// separatore: nessun arco deve collegare direttamente V1 e V2.
 // =============================================================================
 
 #include <cstddef>   // std::size_t, tipo senza segno per indici e dimensioni
@@ -68,6 +74,8 @@
 // Un nodo cosi' come compare in una riga di coords.txt.
 // x e y non servono all'algoritmo (usiamo gli interi i, j), ma li leggiamo
 // per consumare la riga intera e restare fedeli al formato del file.
+// Usare gli interi evita i confronti tra double (x = x^), che con gli
+// arrotondamenti potrebbero dare risultati sbagliati.
 // -----------------------------------------------------------------------------
 struct Nodo {
     long n;      // indice originale del nodo
@@ -78,6 +86,7 @@ struct Nodo {
 // -----------------------------------------------------------------------------
 // Variabili globali condivise dalle funzioni ricorsive.
 // Usarle evita di passare gli stessi vettori come parametro a ogni chiamata.
+// (Alternativa equivalente: passarli per riferimento, const per griglia.)
 // -----------------------------------------------------------------------------
 
 // Tabella posizione -> nodo: griglia[j][i] = indice n del nodo in (i, j).
@@ -200,6 +209,64 @@ int main() {
         return 1;
     }
 
+    // ---- Verifica del separatore con connectivity.txt ----------------------
+    // Proprieta' da controllare: nessun arco collega direttamente un nodo di
+    // V1 (colonna < c) con uno di V2 (colonna > c), dove c e' la colonna del
+    // primo separatore. Ogni cammino tra V1 e V2 deve passare per VS.
+    //
+    // PERCHE' SERVE IL VETTORE colonna? In connectivity.txt un arco e' dato
+    // solo dagli indici n1, n2 dei suoi estremi, non dalle loro coordinate.
+    // Per sapere da che parte del taglio sta un estremo serve la sua colonna
+    // i. colonna[n] = i e' una tabella ad accesso diretto (come perm_inv nel
+    // Task 3): la chiave n e' l'indice del vettore, quindi ogni consultazione
+    // costa O(1). Se invece cercassimo n dentro il vettore nodi a ogni arco,
+    // ogni ricerca costerebbe Theta(N^2) e il totale Theta(N^4): impraticabile
+    // con N = 1024. Costruirla costa Theta(N^2) una volta sola.
+    //
+    // PERCHE' "< c" E "> c" E NON "<="? Perche' riproducono esattamente la
+    // definizione degli insiemi: V1 = colonne < c, V2 = colonne > c,
+    // VS = colonna c. Con "<=" metteremmo i nodi del separatore dentro V1, e
+    // un arco legittimo tra la colonna c e la colonna c+1 (da VS a V2)
+    // verrebbe segnalato come errore.
+    //
+    // PERCHE' NON SI CONTROLLANO I NODI DELLA COLONNA c? Perche' sono il
+    // separatore: e' normale, anzi necessario, che siano collegati sia a V1
+    // sia a V2. Un arco che tocca VS non viola mai la proprieta'. Gli unici
+    // archi vietati sono quelli con un estremo in V1 e l'altro in V2, ed e'
+    // proprio cio' che controlla la condizione dell'if.
+    std::ifstream ce("connectivity.txt");
+    if (!ce) {
+        std::cerr << "Errore: impossibile aprire connectivity.txt "
+                     "(eseguire prima ./task1 N)\n";
+        return 1;
+    }
+    std::vector<int> colonna(nodi.size());
+    for (const Nodo& p : nodi)
+        colonna[p.n] = p.i;  // p.n e' valido: l'ha garantito il controllo sopra
+
+    int c = (1 + N) / 2;  // stessa colonna scelta dalla prima chiamata di ordina
+    long e, a, b;
+    long numArchi = 0;
+    while (ce >> e >> a >> b) {
+        // Un arco con estremi fuori intervallo indica un file non coerente.
+        if (a < 0 || b < 0 || a >= static_cast<long>(nodi.size()) ||
+            b >= static_cast<long>(nodi.size())) {
+            std::cerr << "Errore: connectivity.txt contiene un nodo inesistente\n";
+            return 1;
+        }
+        if ((colonna[a] < c && colonna[b] > c) ||
+            (colonna[a] > c && colonna[b] < c)) {
+            std::cerr << "Errore: l'arco " << e << " attraversa il separatore\n";
+            return 1;
+        }
+        ++numArchi;
+    }
+    // Controllo di coerenza tra i due file: gli archi devono essere 2N(N-1).
+    if (numArchi != 2L * N * (N - 1)) {
+        std::cerr << "Errore: connectivity.txt non e' coerente con coords.txt\n";
+        return 1;
+    }
+
     // ---- Scrittura di ordering.txt -----------------------------------------
     std::ofstream out("ordering.txt");
     if (!out) {
@@ -210,12 +277,13 @@ int main() {
     // La posizione m nella lista e' il nuovo indice del nodo ordine[m].
     // std::size_t e' il tipo di ordine.size(): usarlo per m evita il
     // confronto tra intero con segno e senza segno (warning del compilatore).
+    // '\n' invece di std::endl: niente flush a ogni riga, molto piu' veloce.
     for (std::size_t m = 0; m < ordine.size(); ++m)
         out << m << ' ' << ordine[m] << '\n';
-        // '\n' invece di std::endl: niente flush a ogni riga, molto piu' veloce.
 
     // Stampa di controllo.
-    std::cout << "Riordinati " << ordine.size() << " nodi (N = " << N << ")\n";
+    std::cout << "Riordinati " << ordine.size() << " nodi (N = " << N
+              << "), separatore verificato su " << numArchi << " archi\n";
 
     // I file si chiudono da soli alla fine di main: gli oggetti ifstream e
     // ofstream vengono distrutti e il loro distruttore chiude il file.
