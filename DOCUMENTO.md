@@ -99,5 +99,5 @@ N → [Modulo 1] → coords.txt, connectivity.txt
 ## Questioni aperte
 
 - Come numerare i nodi in coords.txt (per righe o per colonne)? Numerati per righe
-- Quando fermare la ricorsione nel riordinamento?
+- Quando fermare la ricorsione nel riordinamento? ogni chiamata ricorsiva lavora su un blocco con strettamente meno nodi di quello di partenza
 - Quale struttura usare per la matrice sparsa in C++?
