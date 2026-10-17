@@ -98,9 +98,43 @@ tempi e numero di elementi non nulli del fattore L.
      il termine noto si aggiorna in modo coerente.
    - **Dipendenze.** Richiede l'output dei moduli 1 e 2.
 
-4. **Risoluzione e analisi** (notebook Python, Task 4 e 5)
+4. **Risoluzione e analisi** (notebook Python, Task 4)
    Legge A e rhs, fattorizza −A = L·Lᵀ, risolve il sistema, confronta
    i due ordinamenti per N = 32, 64, …, 1024 e produce i grafici.
+  
+   - **Input.** N e la scelta dell'ordinamento. Il notebook lancia
+     `task1`, `task2` e `task3` tramite `subprocess` per generare
+     `A.txt` e `rhs.txt`, così ogni esperimento parte solo da N.
+   - **Output.** La soluzione u, il fattore L, i tempi di
+     fattorizzazione e di soluzione, il residuo, il grafico di u.
+   - **Specifiche.** Legge A in formato COO (triple) e la converte in
+     CSC. Fattorizza −A = LLᵀ con CHOLMOD (`scikit-sparse`), usando
+     `order="natural"` perché la libreria non applichi un suo
+     riordinamento: vogliamo misurare l'effetto del nostro. Risolve
+     Ly = −b e poi Lᵀu = y con `spsolve_triangular`.
+   - **Scelte.** Si fattorizza −A perché A è definita negativa. I
+     sistemi triangolari usano il formato CSR, perché la sostituzione
+     procede per righe. I file vengono letti con `np.fromfile`, molto
+     più veloce di una lettura riga per riga.
+     Con `scikit-sparse` 0.5.0 la funzione `cholesky` restituisce una
+     tupla (R, p) con R triangolare superiore e −A = RᵀR: la funzione
+     del testo è stata quindi adattata prendendo L = Rᵀ, e si controlla
+     che p sia l'identità (nessun riordinamento da parte di CHOLMOD).
+     Il problema è emerso dal controllo del residuo, che risultava
+     circa 1 invece di 10⁻¹⁴.
+   - **Verifica.** Il residuo relativo ‖Au − b‖/‖b‖ è dell'ordine della
+     precisione di macchina (circa 10⁻¹⁴). Con N = 32 i due ordinamenti
+     danno la stessa soluzione, riportata all'ordine naturale.
+   - **Risultato.** La temperatura è nulla sul bordo e ha il massimo
+     (circa 0,73 per N = 32) vicino a (0,2; 0,2): la sorgente è più
+     intensa nell'angolo, ma il bordo freddo disperde il calore.
+   - **Dipendenze.** Richiede gli eseguibili dei moduli 1, 2 e 3.
+
+5. **Confronto e analisi** (Python, Task 5) – *da fare*
+
+   Confronto tra ordinamento naturale e riordinato per
+   N = 32, 64, …, 1024: tempi, non zeri di L, grafici della soluzione
+   e della struttura delle matrici con `spy`.
 
 ## Strutture dati fondamentali (idea iniziale)
 
@@ -121,6 +155,9 @@ N → [Modulo 1] → coords.txt, connectivity.txt
   → [Modulo 2] → ordering.txt
   → [Modulo 3] → A.txt, rhs.txt
   → [Modulo 4] → soluzione, tempi, grafici
+  
+  Il notebook (moduli 4 e 5) esegue i programmi C++ tramite `subprocess`,
+quindi ogni esperimento si riproduce partendo solo da N.
 
 ## Questioni aperte
 
