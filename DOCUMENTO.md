@@ -1,6 +1,6 @@
 # Equazione del calore 2D e riordinamento nelle fattorizzazioni di Cholesky
 
-Documento di progetto – versione 0.1 (schema iniziale)
+Documento di progetto – (schema iniziale)
 
 ## Obiettivo
 
@@ -130,11 +130,27 @@ tempi e numero di elementi non nulli del fattore L.
      intensa nell'angolo, ma il bordo freddo disperde il calore.
    - **Dipendenze.** Richiede gli eseguibili dei moduli 1, 2 e 3.
 
-5. **Confronto e analisi** (Python, Task 5) – *da fare*
+5. **Confronto e analisi** (Python, Task 5) – *implementato in `task5.ipynb`*
 
-   Confronto tra ordinamento naturale e riordinato per
-   N = 32, 64, …, 1024: tempi, non zeri di L, grafici della soluzione
-   e della struttura delle matrici con `spy`.
+   - **Input.** I valori N = 32, 64, …, 1024 e i due ordinamenti. Il
+     notebook genera i file con i programmi C++, come nel modulo 4.
+   - **Output.** Tabella e grafici log-log di nnz(L) e dei tempi di
+     fattorizzazione e soluzione; immagini `spy` di A e L per N = 32
+     con entrambi gli ordinamenti; grafici della soluzione per vari N.
+     I risultati numerici sono salvati in `risultati_task5.json`, le
+     soluzioni in `soluzioni_task5.npz` (ignorato da git perché
+     pesante e rigenerabile).
+   - **Attese teoriche.** Con l'ordinamento naturale A è a banda di
+     semiampiezza N e Cholesky riempie la banda: nnz(L) ≈ N³, costo
+     della fattorizzazione ≈ N⁴. Con il nested dissection:
+     nnz(L) = O(N² log N), costo O(N³) (George, 1973).
+   - **Limite di memoria.** Con l'ordinamento naturale e N = 512 il
+     kernel è stato terminato per memoria esaurita (circa 1,3·10⁸ non
+     zeri, con più copie in memoria su 8 GB di RAM). Il naturale è
+     quindi calcolato fino a N = 256 (`N_MAX_NATURALE`), il nested
+     dissection fino a N = 1024.
+   - **Risultati.** Sono riportate nel documento risultati.json
+   - **Dipendenze.** Richiede gli eseguibili dei moduli 1, 2 e 3.
 
 ## Strutture dati fondamentali (idea iniziale)
 
@@ -164,3 +180,11 @@ quindi ogni esperimento si riproduce partendo solo da N.
 - Come numerare i nodi in coords.txt (per righe o per colonne)? Numerati per righe
 - Quando fermare la ricorsione nel riordinamento? ogni chiamata ricorsiva lavora su un blocco con strettamente meno nodi di quello di partenza
 - Quale struttura usare per la matrice sparsa in C++? nessuna, ci pensa Python convertendola in CSC
+
+## Conclusioni
+
+Il riordinamento di tipo nested dissection non cambia la soluzione, 
+ma cambia profondamente il costo: il fattore L passa da una crescita
+circa cubica a una quasi quadratica in N. In pratica questo è ciò che
+rende risolvibile il problema per N = 1024, che con l'ordinamento
+naturale esaurisce la memoria già a N = 512.
